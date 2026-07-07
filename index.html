@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Julia Senise · Bullet Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --desk: #b7aacd;
+    --cover: #6d5b93;
+    --cover-dark: #544678;
+    --paper: #fbf9f4;
+    --paper-edge: #ece6f2;
+    --ink: #4c4458;
+    --ink-soft: #8d829c;
+    --accent: #8d7bb5;
+    --accent-soft: #d9cdec;
+    --sage: #9db48f;
+    --line: #e5ddef;
+    --cream: #f4f0fa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.3), transparent 60%),
+      radial-gradient(ellipse at 70% 90%, rgba(60,40,90,.18), transparent 60%),
+      var(--desk);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    color: var(--ink);
+    padding: 24px 12px;
+  }
+
+  /* ---------- the book ---------- */
+  .book { position: relative; width: min(560px, 96vw); }
+  .book::before, .book::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 6px 14px 14px 6px;
+    background: var(--paper-edge);
+    box-shadow: 0 1px 0 rgba(40,25,70,.15);
+  }
+  .book::before { transform: translate(7px, 7px); background: #e0d7ea; }
+  .book::after  { transform: translate(3.5px, 3.5px); }
+
+  .page {
+    position: relative;
+    z-index: 2;
+    background:
+      linear-gradient(90deg, rgba(70,50,110,.07), rgba(0,0,0,0) 26px),
+      var(--paper);
+    border-radius: 6px 14px 14px 6px;
+    min-height: 760px;
+    padding: 30px 30px 60px 42px;
+    box-shadow: 0 18px 40px rgba(55,40,90,.4);
+    overflow: hidden;
+    animation: settle .35s ease;
+  }
+  .page.turning-fwd { animation: turnFwd .3s ease; }
+  .page.turning-back { animation: turnBack .3s ease; }
+  @keyframes turnFwd  { from { transform: rotateY(-14deg) translateX(14px); opacity:.3; } to { transform:none; opacity:1; } }
+  @keyframes turnBack { from { transform: rotateY(14deg) translateX(-14px); opacity:.3; } to { transform:none; opacity:1; } }
+  @keyframes settle   { from { opacity:.4; } to { opacity:1; } }
+
+  .page.cover-look {
+    background:
+      radial-gradient(circle at 20% 15%, rgba(255,255,255,.09), transparent 50%),
+      linear-gradient(160deg, var(--cover), var(--cover-dark));
+    color: var(--cream);
+  }
+  .page.cover-look .stitch {
+    position: absolute; inset: 12px;
+    border: 2px dashed rgba(244,240,250,.4);
+    border-radius: 4px 10px 10px 4px;
+    pointer-events: none;
+  }
+
+  /* ---------- corner page-turn controls ---------- */
+  .corner {
+    position: absolute; bottom: 0;
+    width: 64px; height: 64px;
+    cursor: pointer; z-index: 5;
+    border: none; background: transparent; padding: 0;
+  }
+  .corner .fold {
+    position: absolute; bottom: 0;
+    width: 0; height: 0;
+    transition: all .18s ease;
+    filter: drop-shadow(-2px -2px 3px rgba(50,35,85,.2));
+  }
+  .corner.next { right: 0; }
+  .corner.next .fold { right: 0; border-bottom: 44px solid #e2dbee; border-left: 44px solid transparent; }
+  .corner.next:hover .fold { border-bottom-width: 60px; border-left-width: 60px; border-bottom-color: #d3c7e6; }
+  .corner.prev { left: 0; }
+  .corner.prev .fold { left: 0; border-bottom: 44px solid #e2dbee; border-right: 44px solid transparent; }
+  .corner.prev:hover .fold { border-bottom-width: 60px; border-right-width: 60px; border-bottom-color: #d3c7e6; }
+  .cover-look .corner.next .fold { border-bottom-color: #453868; }
+  .cover-look .corner.next:hover .fold { border-bottom-color: #3b2f5a; }
+  .corner .hint {
+    position: absolute; bottom: 10px;
+    font-family: 'Caveat', cursive;
+    font-size: 15px; color: var(--ink-soft);
+    pointer-events: none;
+  }
+  .corner.next .hint { right: 8px; }
+  .corner.prev .hint { left: 8px; }
+  .cover-look .corner .hint { color: rgba(244,240,250,.75); }
+
+  .page-num {
+    position: absolute; bottom: 14px; left: 0; right: 0;
+    text-align: center; font-size: 13px;
+    letter-spacing: .12em; color: var(--ink-soft);
+    pointer-events: none;
+  }
+  .cover-look .page-num { color: rgba(244,240,250,.6); }
+
+  .home-btn {
+    position: absolute; top: 12px; right: 14px; z-index: 5;
+    border: none; background: none;
+    font-family: 'Caveat', cursive;
+    font-size: 17px; color: var(--ink-soft); cursor: pointer;
+  }
+  .home-btn:hover { color: var(--accent); }
+
+  /* ---------- cover / index ---------- */
+  .cover-title { text-align: center; margin-top: 4px; }
+  .cover-title h1 { font-family: 'Caveat', cursive; font-size: 48px; font-weight: 700; line-height: 1; }
+  .cover-title .year { font-size: 18px; letter-spacing: .5em; margin-top: 2px; color: #cbbde4; }
+  .cover-title .flourish { font-size: 16px; color: #cbbde4; }
+
+  .quote-box { text-align: center; margin: 12px auto 4px; max-width: 400px; }
+  .quote-box .q {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-size: 19px;
+    color: #f0eaf9; line-height: 1.3;
+    outline: none;
+    border-bottom: 1px dashed transparent;
+  }
+  .quote-box .q:hover, .quote-box .q:focus { border-bottom-color: rgba(244,240,250,.4); }
+  .quote-box .q-author { font-size: 13.5px; letter-spacing: .15em; color: #cbbde4; margin-top: 2px; }
+  .quote-box .q-new {
+    border: none; background: none; cursor: pointer;
+    font-family: 'Caveat', cursive; font-size: 14px;
+    color: #cbbde4; margin-top: 2px;
+  }
+  .quote-box .q-new:hover { color: #fff; }
+
+  .add-row { display: flex; gap: 10px; justify-content: center; margin: 10px auto 4px; }
+  .scrap-space { min-height: 148px; }
+  .polaroid {
+    background: #fdfbf6;
+    padding: 6px 6px 4px;
+    box-shadow: 0 4px 10px rgba(30,20,60,.4);
+    position: absolute;
+    z-index: 4;
+    cursor: grab;
+    touch-action: none;
+  }
+  .polaroid img { width: 92px; height: 92px; object-fit: cover; display: block; pointer-events: none; }
+  .polaroid.lifting { cursor: grabbing; box-shadow: 0 12px 24px rgba(20,12,45,.55); }
+  .polaroid .cap {
+    width: 92px; border: none; background: none;
+    font-family: 'Caveat', cursive; font-size: 14px;
+    color: var(--ink); text-align: center;
+    padding: 1px 0 0;
+  }
+  .polaroid .cap::placeholder { color: #c9c2d6; }
+  .polaroid .cap:focus { outline: none; }
+  .polaroid .remove {
+    position: absolute; top: -8px; right: -8px;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: none; background: var(--accent); color: #fff;
+    font-size: 12px; line-height: 1; cursor: pointer;
+    opacity: 0; transition: opacity .15s;
+  }
+  .polaroid:hover .remove { opacity: 1; }
+  .polaroid .tape {
+    position: absolute; top: -9px; left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    width: 52px; height: 18px;
+    background: rgba(216,200,240,.85);
+    box-shadow: 0 1px 2px rgba(30,20,60,.25);
+  }
+  .upload-slot {
+    width: 104px; height: 58px;
+    border: 2px dashed rgba(244,240,250,.5);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    cursor: pointer; color: rgba(244,240,250,.85);
+    font-family: 'Caveat', cursive; font-size: 15px;
+    text-align: center; background: none;
+  }
+  .upload-slot:hover { border-color: var(--cream); color: var(--cream); background: rgba(255,255,255,.06); }
+
+  .toc { margin: 10px auto 0; max-width: 400px; }
+  .toc h2 {
+    font-family: 'Caveat', cursive; font-size: 23px;
+    text-align: center; color: #d8cbee;
+    margin-bottom: 6px; font-weight: 600;
+  }
+  .toc-row {
+    display: flex; align-items: baseline; gap: 6px;
+    padding: 2px 2px; font-size: 17px; color: var(--cream);
+  }
+  .toc-row .grab {
+    flex: none; cursor: grab;
+    color: rgba(244,240,250,.45); font-size: 13px;
+    padding: 0 2px; touch-action: none; user-select: none;
+  }
+  .toc-row .grab:hover { color: var(--cream); }
+  .toc-row.dragging { opacity: .45; }
+  .toc-row.drop-target { background: rgba(255,255,255,.14); border-radius: 4px; }
+  .toc-row .pal-dots { flex: none; letter-spacing: -1px; font-size: 12px; transform: translateY(-1px); }
+  .toc-row .pal-dots i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 2px; box-shadow: 0 0 0 1px rgba(255,255,255,.35); }
+  .toc-name {
+    border: none; background: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px; color: var(--cream);
+    border-bottom: 1px dashed transparent;
+    min-width: 40px; flex: 0 1 auto; width: 180px;
+  }
+  .toc-name:hover { border-bottom-color: rgba(244,240,250,.4); }
+  .toc-name:focus { outline: none; border-bottom-color: var(--accent-soft); }
+  .toc-row .dots { flex: 1; margin: 0 6px; border-bottom: 1.5px dotted rgba(244,240,250,.45); transform: translateY(-4px); }
+  .toc-row .pg-go {
+    border: none; background: none; cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px; color: var(--cream); opacity: .85;
+  }
+  .toc-row .pg-go:hover { color: #ffd9f0; opacity: 1; }
+  .toc-row .toc-x {
+    border: none; background: none; cursor: pointer;
+    color: rgba(244,240,250,.4); font-size: 13px;
+  }
+  .toc-row .toc-x:hover { color: #f0a8a8; }
+  button.toc-entry {
+    display: flex; align-items: baseline; width: 100%;
+    background: none; border: none; color: var(--cream);
+    font-family: 'Cormorant Garamond', serif; font-size: 17px;
+    padding: 2px 2px; cursor: pointer; text-align: left;
+  }
+  button.toc-entry:hover { color: #ffd9f0; }
+  button.toc-entry .dots { flex: 1; margin: 0 8px; border-bottom: 1.5px dotted rgba(244,240,250,.45); transform: translateY(-4px); }
+  button.toc-entry .pg { font-size: 14px; opacity: .8; }
+  .toc-sub { font-size: 15px !important; padding-left: 18px !important; }
+
+  /* ---------- shared page header ---------- */
+  .page-head { text-align: center; margin-bottom: 8px; }
+  .page-head .kicker { font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-soft); }
+  .page-head h2 { font-family: 'Caveat', cursive; font-size: 32px; font-weight: 600; color: var(--ink); line-height: 1.1; }
+  .page-head h2 input {
+    font: inherit; color: inherit; border: none; background: none;
+    text-align: center; width: 100%;
+    border-bottom: 1.5px dashed transparent;
+  }
+  .page-head h2 input:hover { border-bottom-color: var(--line); }
+  .page-head h2 input:focus { outline: none; border-bottom-color: var(--accent-soft); }
+
+  /* ---------- color legend ---------- */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    justify-content: center; align-items: center;
+    margin: 4px 0 8px;
+  }
+  .chip {
+    display: flex; align-items: center; gap: 4px;
+    border: 1.5px solid var(--line);
+    border-radius: 20px;
+    padding: 2px 7px 2px 3px;
+    background: #fff9;
+    cursor: pointer;
+    transition: box-shadow .12s, border-color .12s;
+  }
+  .chip.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .chip input[type=color] {
+    width: 20px; height: 20px;
+    border: none; padding: 0; background: none;
+    border-radius: 50%; overflow: hidden; cursor: pointer;
+  }
+  .chip input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+  .chip input[type=color]::-webkit-color-swatch { border: 1px solid rgba(0,0,0,.15); border-radius: 50%; }
+  .chip .sw-label {
+    border: none; background: none;
+    font-family: 'Caveat', cursive; font-size: 16px;
+    color: var(--ink); width: 74px;
+    border-bottom: 1px dashed transparent;
+  }
+  .chip .sw-label:hover { border-bottom-color: var(--line); }
+  .chip .sw-label:focus { outline: none; border-bottom-color: var(--accent-soft); }
+  .chip .sw-del { border: none; background: none; color: var(--ink-soft); cursor: pointer; font-size: 12px; padding: 0 1px; }
+  .chip .sw-del:hover { color: #c96f6f; }
+  .legend .add-sw {
+    border: 1.5px dashed var(--line); background: none;
+    border-radius: 20px; padding: 3px 10px;
+    font-family: 'Caveat', cursive; font-size: 15px;
+    color: var(--ink-soft); cursor: pointer;
+  }
+  .legend .add-sw:hover { color: var(--accent); border-color: var(--accent-soft); }
+  .legend-hint {
+    text-align: center; font-family: 'Caveat', cursive;
+    font-size: 14px; color: var(--ink-soft); margin-bottom: 4px;
+  }
+
+  /* ---------- year-in-a-glance grid (13 x 32) ---------- */
+  .yig-wrap { display: flex; justify-content: center; }
+  table.yig { border-collapse: collapse; }
+  table.yig th, table.yig td { border: 1px solid var(--line); text-align: center; font-size: 10.5px; }
+  table.yig th {
+    background: #f1ecf7; color: var(--ink-soft);
+    font-family: 'Caveat', cursive; font-size: 13px; font-weight: 600;
+    width: 33px; height: 17px;
+  }
+  table.yig td.day-label { background: #f1ecf7; color: var(--ink-soft); font-size: 10px; width: 33px; height: 16.5px; }
+  table.yig td.cell { width: 33px; cursor: pointer; transition: background .1s; }
+  table.yig td.cell:not([data-ci]):hover { background: var(--accent-soft); }
+  table.yig td.cell[data-ci]:hover { filter: brightness(1.08); }
+  table.yig td.cell.invalid {
+    background: repeating-linear-gradient(45deg, #ece7f3, #ece7f3 3px, #f6f2fa 3px, #f6f2fa 6px);
+    cursor: default; pointer-events: none;
+  }
+  table.yig td.cell.today { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* ---------- stats ---------- */
+  .yig-stats {
+    margin-top: 8px;
+    display: flex; flex-wrap: wrap; gap: 4px 14px;
+    justify-content: center;
+    font-family: 'Caveat', cursive;
+    font-size: 16.5px; color: var(--ink);
+  }
+  .yig-stats .stat { display: inline-flex; align-items: center; gap: 5px; }
+  .yig-stats .stat i {
+    width: 11px; height: 11px; border-radius: 3px;
+    display: inline-block; border: 1px solid rgba(0,0,0,.12);
+  }
+  .yig-stats .stat b { color: var(--accent); font-weight: 700; }
+  .yig-stats .stat.none { color: var(--ink-soft); }
+  .yig-stats .stat.none i { background: var(--paper); border: 1px dashed var(--ink-soft); }
+  .yig-actions { text-align: center; margin-top: 2px; }
+  .yig-actions button {
+    border: none; background: none;
+    font-family: 'Caveat', cursive; font-size: 14px;
+    color: var(--ink-soft); cursor: pointer;
+  }
+  .yig-actions button:hover { color: #c96f6f; }
+
+  /* ---------- months hub (one square per month) ---------- */
+  .hub-hint {
+    text-align: center; font-family: 'Caveat', cursive;
+    font-size: 17px; color: var(--ink-soft); margin: 2px 0 12px;
+  }
+  .mo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    padding: 0 10px;
+  }
+  .mo-card {
+    aspect-ratio: 1 / 1;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    background: rgba(255,255,255,.55);
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .mo-card:hover {
+    transform: translateY(-3px) rotate(-1deg);
+    box-shadow: 0 8px 18px rgba(55,40,90,.18);
+    border-color: var(--accent-soft);
+  }
+  .mo-card.now { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .mo-card .mo-name { font-family: 'Caveat', cursive; font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1; }
+  .mo-card .mo-count { font-family: 'Cormorant Garamond', serif; font-size: 13px; color: var(--ink-soft); }
+  .mo-card .mo-bar {
+    width: 64%; height: 5px;
+    background: var(--line); border-radius: 3px; overflow: hidden;
+  }
+  .mo-card .mo-bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+  .mo-card.now .mo-name { color: var(--accent); }
+
+  /* ---------- monthly one-sentence-a-day ---------- */
+  .osad { margin-top: 2px; }
+  .osad-row { display: flex; align-items: baseline; gap: 8px; padding: 0 2px; }
+  .osad-row .dnum {
+    width: 30px; flex: none; font-size: 12.5px;
+    color: var(--ink-soft); text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .osad-row .dnum .dow { font-size: 9.5px; letter-spacing: .05em; }
+  .osad-row input {
+    flex: 1; border: none; background: none;
+    border-bottom: 1px solid var(--line);
+    font-family: 'Caveat', cursive; font-size: 16.5px;
+    color: var(--ink); padding: 0 2px 1px; height: 19.5px;
+  }
+  .osad-row input:focus { outline: none; border-bottom-color: var(--accent); }
+  .osad-row.today .dnum { color: var(--accent); font-weight: 700; }
+  .osad-row.today input { border-bottom-color: var(--accent-soft); }
+
+  /* ---------- doodle pad ---------- */
+  .doodle-overlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(60,45,100,.5);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .doodle-overlay[hidden] { display: none; }
+  .doodle-panel {
+    background: var(--paper);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: 0 20px 50px rgba(30,20,60,.5);
+    text-align: center;
+  }
+  .doodle-panel h3 { font-family: 'Caveat', cursive; font-size: 24px; color: var(--ink); margin-bottom: 8px; }
+  #doodleCanvas {
+    border: 2px solid var(--line); border-radius: 6px;
+    background: #fff; cursor: crosshair; touch-action: none;
+    display: block; margin: 0 auto;
+  }
+  .doodle-tools { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px 0 4px; flex-wrap: wrap; }
+  .pen-color {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid transparent; cursor: pointer; padding: 0;
+  }
+  .pen-color.active { border-color: var(--ink); box-shadow: 0 0 0 2px #fff inset; }
+  .pen-size {
+    border: 1.5px solid var(--line); background: #fff;
+    border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink);
+  }
+  .pen-size.s1 { width: 22px; height: 22px; font-size: 7px; }
+  .pen-size.s2 { width: 26px; height: 26px; font-size: 11px; }
+  .pen-size.s3 { width: 30px; height: 30px; font-size: 16px; }
+  .pen-size.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .doodle-btns { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
+  .doodle-btns button {
+    font-family: 'Caveat', cursive; font-size: 17px;
+    border: none; border-radius: 18px;
+    padding: 4px 16px; cursor: pointer;
+  }
+  .d-save { background: var(--accent); color: #fff; }
+  .d-save:hover { background: #7b69a5; }
+  .d-clear, .d-cancel { background: var(--paper-edge); color: var(--ink); }
+  .d-clear:hover, .d-cancel:hover { background: var(--accent-soft); }
+
+  @media (max-width: 480px) {
+    .page { padding: 24px 16px 56px 26px; min-height: 700px; }
+    table.yig th, table.yig td.day-label, table.yig td.cell { width: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="book">
+  <div class="page" id="page"></div>
+</div>
+<input type="file" id="photoInput" accept="image/*" multiple hidden>
+
+<div class="doodle-overlay" id="doodleOverlay" hidden>
+  <div class="doodle-panel">
+    <h3>✎ doodle something lovely</h3>
+    <canvas id="doodleCanvas" width="300" height="300"></canvas>
+    <div class="doodle-tools" id="doodleTools"></div>
+    <div class="doodle-btns">
+      <button class="d-save" id="doodleSave">tape it in ✦</button>
+      <button class="d-clear" id="doodleClear">start over</button>
+      <button class="d-cancel" id="doodleCancel">never mind</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const YEAR = 2026;
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const MO_ABBR = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+  const DAYS_IN = [31, (YEAR % 4 === 0 && (YEAR % 100 !== 0 || YEAR % 400 === 0)) ? 29 : 28, 31,30,31,30,31,31,30,31,30,31];
+  const TOTAL_DAYS = DAYS_IN.reduce((a, b) => a + b, 0);
+  const DOW = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+  const STORE_KEY = "julia-bujo-v1";
+  const MAX_COLORS = 5;
+  const COLOR_POOL = ["#9db48f", "#b9a7d9", "#e2a29b", "#e7c982", "#92b4d4"];
+  const QUOTES = [
+    { q: "She believed she could, so she did.", a: "R.S. Grey" },
+    { q: "Little by little, a little becomes a lot.", a: "Tanzanian proverb" },
+    { q: "You don't have to be perfect, just consistent.", a: "unknown" },
+    { q: "Bloom where you are planted.", a: "unknown" },
+    { q: "One day, or day one — you decide.", a: "unknown" },
+    { q: "Small steps every day add up to big dreams.", a: "unknown" },
+    { q: "Be gentle with yourself, you're doing your best.", a: "unknown" },
+    { q: "The secret of getting ahead is getting started.", a: "Mark Twain" },
+  ];
+
+  const defaultPalette = () => [
+    { c: "#9db48f", label: "did it ✓" },
+    { c: "#b9a7d9", label: "partly" },
+    { c: "#e2a29b", label: "skipped" },
+  ];
+
+  // ---------- state + migration from the v1 shape ----------
+  let state = {
+    photos: [],                     // [{src, caption}]
+    quote: null,                    // custom quote text, or null to use QUOTES[quoteIdx]
+    quoteIdx: 0,
+    habits: [
+      { name: "Movement", palette: defaultPalette(), cells: {} },
+      { name: "Reading",  palette: defaultPalette(), cells: {} },
+      { name: "Water 2L", palette: defaultPalette(), cells: {} },
+    ],
+    sentences: {},                  // { "month-day": "text" }
+  };
+  // default spot for the i-th polaroid: a loose scatter in the middle of the cover
+  const scatter = (i) => ({ x: 8 + ((i * 19) % 55), y: 30 + ((i * 9) % 16), rot: ((i * 47) % 13) - 6 });
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (saved && saved.habits) {
+      state = saved;
+      state.photos = (state.photos || []).map(p => typeof p === "string" ? { src: p, caption: "" } : p);
+      state.photos.forEach((p, i) => { if (p.x == null) Object.assign(p, scatter(i)); });
+      state.habits.forEach(h => {
+        if (!h.palette) h.palette = defaultPalette();
+        for (const k in h.cells) if (h.cells[k] === true) h.cells[k] = 0;
+      });
+      if (state.quoteIdx == null) state.quoteIdx = 0;
+      if (!("quote" in state)) state.quote = null;
+    }
+  } catch (e) { /* fresh journal */ }
+
+  function save() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+  // ---------- page model: 0 = cover, then habits, then 12 months ----------
+  let current = 0;
+  let activeSw = 0;   // which legend color is the "brush" on the open habit page
+  // pages: 0 = cover, then habit pages, then the months hub, then the 12 months
+  const pageCount = () => 1 + state.habits.length + 1 + 12;
+  const monthsHub = () => 1 + state.habits.length;
+
+  const today = new Date();
+  const isThisYear = today.getFullYear() === YEAR;
+  const elapsedDays = isThisYear
+    ? Math.floor((today - new Date(YEAR, 0, 1)) / 864e5) + 1
+    : (today.getFullYear() > YEAR ? TOTAL_DAYS : 0);
+
+  const pageEl = document.getElementById("page");
+  const photoInput = document.getElementById("photoInput");
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+  function safeColor(c) { return /^#[0-9a-fA-F]{6}$/.test(c) ? c : "#b9a7d9"; }
+
+  function go(n, dir) {
+    current = Math.max(0, Math.min(pageCount() - 1, n));
+    activeSw = 0;
+    render(dir);
+  }
+
+  // ---------- cover ----------
+  function renderCover() {
+    pageEl.classList.add("cover-look");
+    let html = '<div class="stitch"></div>';
+    html += '<div class="cover-title"><div class="flourish">❦</div><h1>Julia Senise</h1><div class="year">' + YEAR + '</div></div>';
+
+    const quote = state.quote != null ? { q: state.quote, a: "" } : QUOTES[state.quoteIdx % QUOTES.length];
+    html += '<div class="quote-box">' +
+            '<div class="q" id="quoteText" contenteditable="true" spellcheck="false">“' + esc(quote.q) + '”</div>' +
+            (quote.a ? '<div class="q-author">— ' + esc(quote.a) + '</div>' : '') +
+            '<button class="q-new" id="quoteNew">↻ another quote (or click it to write your own)</button></div>';
+
+    html += '<div class="add-row">' +
+            '<button class="upload-slot" id="uploadBtn"><span>✦</span> add a photo</button>' +
+            '<button class="upload-slot" id="doodleBtn"><span>✎</span> draw a doodle</button>' +
+            '</div><div class="scrap-space"></div>';
+    state.photos.forEach((p, i) => {
+      html += '<div class="polaroid" data-ph="' + i + '" style="left:' + (+p.x || 0) + '%;top:' + (+p.y || 0) + '%;transform:rotate(' + (+p.rot || 0) + 'deg)">' +
+              '<div class="tape"></div><img draggable="false" src="' + p.src + '" alt="memory">' +
+              '<input class="cap" data-cap="' + i + '" maxlength="24" placeholder="caption…" value="' + esc(p.caption || "") + '">' +
+              '<button class="remove" data-rm="' + i + '" title="remove">×</button></div>';
+    });
+
+    html += '<div class="toc"><h2>~ index ~</h2>';
+    state.habits.forEach((h, i) => {
+      const dots = h.palette.map(sw => '<i style="background:' + safeColor(sw.c) + '"></i>').join("");
+      html += '<div class="toc-row" data-row="' + i + '">' +
+              '<span class="grab" title="drag to reorder pages">⠿</span>' +
+              '<span class="pal-dots">' + dots + '</span>' +
+              '<input class="toc-name" data-tocname="' + i + '" value="' + esc(h.name) + '" aria-label="habit name">' +
+              '<span class="dots"></span>' +
+              '<button class="pg-go" data-go="' + (1 + i) + '">' + (1 + i) + ' →</button>' +
+              '<button class="toc-x" data-del-habit="' + i + '" title="remove page">×</button>' +
+              '</div>';
+    });
+    html += '<button class="toc-entry" data-go="' + monthsHub() + '"><span>One Sentence a Day</span><span class="dots"></span><span class="pg">' + monthsHub() + '–' + (pageCount() - 1) + '</span></button>';
+    const curMo = isThisYear ? today.getMonth() : 0;
+    html += '<button class="toc-entry toc-sub" data-go="' + (monthsHub() + 1 + curMo) + '"><span>↳ jump to ' + MONTHS[curMo] + '</span><span class="dots"></span><span class="pg">' + (monthsHub() + 1 + curMo) + '</span></button>';
+    html += '<button class="toc-entry toc-sub" id="addHabit"><span>+ add a habit page</span><span class="dots"></span><span class="pg">✎</span></button>';
+    html += '</div>';
+    return html;
+  }
+
+  // ---------- year-in-a-glance ----------
+  function legendHTML(h) {
+    let html = '<div class="legend-hint">your colors — pick one to paint with, click the dot to change it, name what it means</div>';
+    html += '<div class="legend">';
+    h.palette.forEach((sw, i) => {
+      html += '<div class="chip' + (i === activeSw ? " active" : "") + '" data-chip="' + i + '">' +
+              '<input type="color" data-swcolor="' + i + '" value="' + safeColor(sw.c) + '" title="change color">' +
+              '<input class="sw-label" data-swlabel="' + i + '" maxlength="16" value="' + esc(sw.label) + '" placeholder="means…">' +
+              (h.palette.length > 1 ? '<button class="sw-del" data-swdel="' + i + '" title="remove color">×</button>' : "") +
+              '</div>';
+    });
+    if (h.palette.length < MAX_COLORS) html += '<button class="add-sw" id="addSwatch">+ color</button>';
+    html += '</div>';
+    return html;
+  }
+
+  function statsHTML(h) {
+    const counts = h.palette.map(() => 0);
+    let marked = 0, markedElapsed = 0;
+    for (const [key, idx] of Object.entries(h.cells)) {
+      if (typeof idx !== "number" || !h.palette[idx]) continue;
+      counts[idx]++; marked++;
+      const [m, d] = key.split("-").map(Number);
+      if (!isThisYear || new Date(YEAR, m, d) <= today) markedElapsed++;
+    }
+    let html = '<div class="yig-stats">';
+    h.palette.forEach((sw, i) => {
+      html += '<span class="stat"><i style="background:' + safeColor(sw.c) + '"></i>' +
+              esc(sw.label || "…") + ' — <b>' + counts[i] + '</b></span>';
+    });
+    const blank = Math.max(0, elapsedDays - markedElapsed);
+    html += '<span class="stat none"><i></i>no mark — <b>' + blank + '</b> of ' + elapsedDays + ' days so far</span>';
+    html += '</div>';
+    return html;
+  }
+
+  function renderHabit(idx) {
+    const h = state.habits[idx];
+    let html = '<div class="page-head"><div class="kicker">Year in a Glance · ' + YEAR + '</div>' +
+               '<h2><input value="' + esc(h.name) + '" data-habit-name="' + idx + '" aria-label="habit name"></h2></div>';
+    html += legendHTML(h);
+
+    html += '<div class="yig-wrap"><table class="yig"><tr><th></th>';
+    MO_ABBR.forEach((m, mi) => html += '<th title="' + MONTHS[mi] + '">' + m + '</th>');
+    html += '</tr>';
+    for (let d = 1; d <= 31; d++) {
+      html += '<tr><td class="day-label">' + d + '</td>';
+      for (let m = 0; m < 12; m++) {
+        if (d > DAYS_IN[m]) { html += '<td class="cell invalid"></td>'; continue; }
+        const key = m + "-" + d;
+        const ci = h.cells[key];
+        const has = typeof ci === "number" && h.palette[ci];
+        const cls = ["cell"];
+        if (isThisYear && today.getMonth() === m && today.getDate() === d) cls.push("today");
+        html += '<td class="' + cls.join(" ") + '" data-cell="' + key + '"' +
+                (has ? ' data-ci="' + ci + '" style="background:' + safeColor(h.palette[ci].c) + '"' : "") + '></td>';
+      }
+      html += '</tr>';
+    }
+    html += '</table></div>';
+    html += statsHTML(h);
+    html += '<div class="yig-actions"><button data-del-habit="' + idx + '">remove this page</button></div>';
+    return html;
+  }
+
+  // ---------- months hub: one square per month, linking to its page ----------
+  function renderMonthsHub() {
+    let html = '<div class="page-head"><div class="kicker">One Sentence a Day</div>' +
+               '<h2>' + YEAR + ', month by month</h2></div>';
+    html += '<div class="hub-hint">pick a month — the little bar shows how many sentences you’ve written ↓</div>';
+    html += '<div class="mo-grid">';
+    MONTHS.forEach((name, m) => {
+      const total = DAYS_IN[m];
+      let filled = 0;
+      for (let d = 1; d <= total; d++) if (state.sentences[m + "-" + d]) filled++;
+      const isCur = isThisYear && today.getMonth() === m;
+      html += '<button class="mo-card' + (isCur ? " now" : "") + '" data-go="' + (monthsHub() + 1 + m) + '">' +
+              '<span class="mo-name">' + name + '</span>' +
+              '<span class="mo-count">' + filled + ' of ' + total + '</span>' +
+              '<span class="mo-bar"><i style="width:' + Math.round(filled / total * 100) + '%"></i></span>' +
+              '</button>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  // ---------- monthly ----------
+  function renderMonth(m) {
+    let html = '<div class="page-head"><div class="kicker">One Sentence a Day</div>' +
+               '<h2>' + MONTHS[m] + ' ' + YEAR + '</h2></div>';
+    html += '<div class="osad">';
+    for (let d = 1; d <= DAYS_IN[m]; d++) {
+      const key = m + "-" + d;
+      const dow = DOW[new Date(YEAR, m, d).getDay()];
+      const isToday = isThisYear && today.getMonth() === m && today.getDate() === d;
+      html += '<div class="osad-row' + (isToday ? " today" : "") + '">' +
+              '<div class="dnum">' + d + ' <span class="dow">' + dow + '</span></div>' +
+              '<input maxlength="140" data-sentence="' + key + '" value="' + esc(state.sentences[key] || "") + '">' +
+              '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function render(dir) {
+    pageEl.classList.remove("cover-look", "turning-fwd", "turning-back");
+    void pageEl.offsetWidth;
+
+    let body;
+    if (current === 0) body = renderCover();
+    else if (current < monthsHub()) body = renderHabit(current - 1);
+    else if (current === monthsHub()) body = renderMonthsHub();
+    else body = renderMonth(current - monthsHub() - 1);
+
+    let chrome = "";
+    if (current > 0) {
+      chrome += '<button class="home-btn" data-go="0">⌂ index</button>';
+      chrome += '<button class="corner prev" data-go="' + (current - 1) + '" aria-label="previous page"><span class="fold"></span><span class="hint">‹</span></button>';
+    }
+    if (current < pageCount() - 1) {
+      chrome += '<button class="corner next" data-go="' + (current + 1) + '" aria-label="next page"><span class="fold"></span><span class="hint">›</span></button>';
+    }
+    chrome += '<div class="page-num">' + (current === 0 ? "❦" : "— " + current + " —") + '</div>';
+
+    pageEl.innerHTML = body + chrome;
+    if (dir === 1) pageEl.classList.add("turning-fwd");
+    if (dir === -1) pageEl.classList.add("turning-back");
+  }
+
+  function refreshStats() {
+    const el = pageEl.querySelector(".yig-stats");
+    if (el && current > 0 && current < monthsHub()) el.outerHTML = statsHTML(state.habits[current - 1]);
+  }
+
+  function setActiveSwatch(i) {
+    activeSw = i;
+    pageEl.querySelectorAll(".chip").forEach(ch => ch.classList.toggle("active", +ch.dataset.chip === i));
+  }
+
+  // ---------- events (delegated) ----------
+  pageEl.addEventListener("click", (e) => {
+    const del = e.target.closest("[data-del-habit]");
+    if (del) {
+      const i = +del.dataset.delHabit;
+      if (confirm('Remove the "' + state.habits[i].name + '" page? Its squares will be lost.')) {
+        state.habits.splice(i, 1); save(); go(0);
+      }
+      return;
+    }
+    const swdel = e.target.closest("[data-swdel]");
+    if (swdel) {
+      const h = state.habits[current - 1];
+      const i = +swdel.dataset.swdel;
+      const used = Object.values(h.cells).filter(v => v === i).length;
+      if (used && !confirm('Remove this color? ' + used + ' painted square' + (used === 1 ? "" : "s") + ' will be cleared.')) return;
+      h.palette.splice(i, 1);
+      for (const k in h.cells) {
+        if (h.cells[k] === i) delete h.cells[k];
+        else if (h.cells[k] > i) h.cells[k]--;
+      }
+      if (activeSw >= h.palette.length) activeSw = 0;
+      save(); render();
+      return;
+    }
+    if (e.target.closest("#addSwatch")) {
+      const h = state.habits[current - 1];
+      if (h.palette.length < MAX_COLORS) {
+        h.palette.push({ c: COLOR_POOL[h.palette.length % COLOR_POOL.length], label: "means…" });
+        activeSw = h.palette.length - 1;
+        save(); render();
+      }
+      return;
+    }
+    const chip = e.target.closest("[data-chip]");
+    if (chip) { setActiveSwatch(+chip.dataset.chip); return; }
+
+    const cell = e.target.closest("[data-cell]");
+    if (cell) {
+      const h = state.habits[current - 1];
+      const key = cell.dataset.cell;
+      if (h.cells[key] === activeSw) {
+        delete h.cells[key];
+        cell.removeAttribute("data-ci");
+        cell.style.background = "";
+      } else if (h.palette[activeSw]) {
+        h.cells[key] = activeSw;
+        cell.dataset.ci = activeSw;
+        cell.style.background = safeColor(h.palette[activeSw].c);
+      }
+      save(); refreshStats();
+      return;
+    }
+
+    const goBtn = e.target.closest("[data-go]");
+    if (goBtn) { const n = +goBtn.dataset.go; go(n, n > current ? 1 : -1); return; }
+    if (e.target.closest("#uploadBtn")) { photoInput.click(); return; }
+    if (e.target.closest("#doodleBtn")) { openDoodle(); return; }
+    if (e.target.closest("#quoteNew")) {
+      state.quote = null;
+      state.quoteIdx = (state.quoteIdx + 1) % QUOTES.length;
+      save(); render();
+      return;
+    }
+    if (e.target.closest("#addHabit")) {
+      const name = prompt("Name this habit page:", "New habit");
+      if (name) {
+        state.habits.push({ name: name.trim() || "New habit", palette: defaultPalette(), cells: {} });
+        save(); render();
+      }
+      return;
+    }
+    const rm = e.target.closest("[data-rm]");
+    if (rm) { state.photos.splice(+rm.dataset.rm, 1); save(); render(); return; }
+  });
+
+  // touching a chip's inputs also makes it the active brush
+  pageEl.addEventListener("focusin", (e) => {
+    const chip = e.target.closest("[data-chip]");
+    if (chip) setActiveSwatch(+chip.dataset.chip);
+  });
+
+  pageEl.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.matches("[data-sentence]")) {
+      const key = t.dataset.sentence;
+      if (t.value) state.sentences[key] = t.value; else delete state.sentences[key];
+      save();
+    } else if (t.matches("[data-habit-name]")) {
+      state.habits[+t.dataset.habitName].name = t.value; save();
+    } else if (t.matches("[data-tocname]")) {
+      state.habits[+t.dataset.tocname].name = t.value; save();
+    } else if (t.matches("[data-swlabel]")) {
+      state.habits[current - 1].palette[+t.dataset.swlabel].label = t.value;
+      save(); refreshStats();
+    } else if (t.matches("[data-cap]")) {
+      state.photos[+t.dataset.cap].caption = t.value; save();
+    }
+  });
+
+  pageEl.addEventListener("change", (e) => {
+    if (e.target.matches("[data-swcolor]")) {
+      const h = state.habits[current - 1];
+      const i = +e.target.dataset.swcolor;
+      h.palette[i].c = safeColor(e.target.value);
+      activeSw = i;
+      save(); render();
+    }
+  });
+
+  // custom quote: save whatever she writes when she clicks away
+  pageEl.addEventListener("focusout", (e) => {
+    if (e.target.id === "quoteText") {
+      const txt = e.target.textContent.replace(/^[“"]|[”"]$/g, "").trim();
+      const builtin = QUOTES[state.quoteIdx % QUOTES.length].q;
+      state.quote = (txt && txt !== builtin) ? txt : (txt ? null : state.quote);
+      save(); render();
+    }
+  });
+
+  // ---------- cover drag: polaroids go anywhere, index rows reorder pages ----------
+  let dragPh = null, dragRow = null;
+
+  pageEl.addEventListener("pointerdown", (e) => {
+    if (current !== 0) return;
+    const grab = e.target.closest(".grab");
+    if (grab) {
+      const row = grab.closest(".toc-row");
+      dragRow = { from: +row.dataset.row, el: row };
+      row.classList.add("dragging");
+      try { grab.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+      return;
+    }
+    const pol = e.target.closest(".polaroid");
+    if (!pol || e.target.closest("input,button")) return;
+    const r = pol.getBoundingClientRect();
+    dragPh = { i: +pol.dataset.ph, el: pol, dx: e.clientX - r.left, dy: e.clientY - r.top };
+    pol.classList.add("lifting");
+    pol.style.zIndex = 20;
+    try { pol.setPointerCapture(e.pointerId); } catch (err) {}
+    e.preventDefault();
+  });
+
+  pageEl.addEventListener("pointermove", (e) => {
+    if (dragPh) {
+      const rect = pageEl.getBoundingClientRect();
+      const w = dragPh.el.offsetWidth / rect.width * 100;
+      const h = dragPh.el.offsetHeight / rect.height * 100;
+      const x = Math.min(Math.max((e.clientX - dragPh.dx - rect.left) / rect.width * 100, 0), 100 - w);
+      const y = Math.min(Math.max((e.clientY - dragPh.dy - rect.top) / rect.height * 100, 0), 100 - h);
+      dragPh.el.style.left = x + "%";
+      dragPh.el.style.top = y + "%";
+    } else if (dragRow) {
+      pageEl.querySelectorAll(".toc-row").forEach(r => {
+        const b = r.getBoundingClientRect();
+        r.classList.toggle("drop-target", r !== dragRow.el && e.clientY >= b.top && e.clientY <= b.bottom);
+      });
+    }
+  });
+
+  function endDrag() {
+    if (dragPh) {
+      const p = state.photos[dragPh.i];
+      p.x = parseFloat(dragPh.el.style.left) || p.x;
+      p.y = parseFloat(dragPh.el.style.top) || p.y;
+      dragPh.el.classList.remove("lifting");
+      dragPh.el.style.zIndex = "";
+      save();
+      dragPh = null;
+    } else if (dragRow) {
+      const target = pageEl.querySelector(".toc-row.drop-target");
+      dragRow.el.classList.remove("dragging");
+      if (target) {
+        const to = +target.dataset.row;
+        const [moved] = state.habits.splice(dragRow.from, 1);
+        state.habits.splice(to, 0, moved);
+        save();
+      }
+      dragRow = null;
+      render();
+    }
+  }
+  pageEl.addEventListener("pointerup", endDrag);
+  pageEl.addEventListener("pointercancel", endDrag);
+
+  document.addEventListener("keydown", (e) => {
+    const a = document.activeElement;
+    if (/^(INPUT|TEXTAREA)$/.test(a.tagName) || a.isContentEditable) return;
+    if (!document.getElementById("doodleOverlay").hidden) return;
+    if (e.key === "ArrowRight") go(current + 1, 1);
+    if (e.key === "ArrowLeft") go(current - 1, -1);
+  });
+
+  // ---------- photo upload: shrink to fit localStorage ----------
+  photoInput.addEventListener("change", async () => {
+    for (const file of photoInput.files) {
+      const url = await new Promise((res) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.readAsDataURL(file);
+      });
+      const small = await new Promise((res) => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement("canvas");
+          const s = Math.min(1, 320 / Math.max(img.width, img.height));
+          c.width = Math.round(img.width * s);
+          c.height = Math.round(img.height * s);
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          res(c.toDataURL("image/jpeg", 0.75));
+        };
+        img.onerror = () => res(null);
+        img.src = url;
+      });
+      if (small) state.photos.push({ src: small, caption: "", ...scatter(state.photos.length) });
+    }
+    photoInput.value = "";
+    try { save(); } catch (e) {
+      state.photos.pop();
+      alert("That photo wouldn't fit in the journal's storage — try a smaller one.");
+    }
+    render();
+  });
+
+  // ---------- doodle pad ----------
+  const overlay = document.getElementById("doodleOverlay");
+  const dCanvas = document.getElementById("doodleCanvas");
+  const dCtx = dCanvas.getContext("2d");
+  const PEN_COLORS = ["#4c4458", "#8d7bb5", "#c96f8f", "#9db48f", "#e0a94f", "#6f93c9"];
+  const PEN_SIZES = [2.5, 5, 9];
+  let penColor = PEN_COLORS[0], penSize = PEN_SIZES[1], drawing = false;
+
+  function drawTools() {
+    const tools = document.getElementById("doodleTools");
+    tools.innerHTML =
+      PEN_COLORS.map(c => '<button class="pen-color' + (c === penColor ? " active" : "") + '" data-pen="' + c + '" style="background:' + c + '"></button>').join("") +
+      PEN_SIZES.map((s, i) => '<button class="pen-size s' + (i + 1) + (s === penSize ? " active" : "") + '" data-size="' + s + '">●</button>').join("");
+  }
+  function clearDoodle() {
+    dCtx.fillStyle = "#ffffff";
+    dCtx.fillRect(0, 0, dCanvas.width, dCanvas.height);
+  }
+  function openDoodle() { clearDoodle(); drawTools(); overlay.hidden = false; }
+
+  document.getElementById("doodleTools").addEventListener("click", (e) => {
+    const pen = e.target.closest("[data-pen]");
+    if (pen) { penColor = pen.dataset.pen; drawTools(); }
+    const size = e.target.closest("[data-size]");
+    if (size) { penSize = +size.dataset.size; drawTools(); }
+  });
+  dCanvas.addEventListener("pointerdown", (e) => {
+    drawing = true;
+    dCanvas.setPointerCapture(e.pointerId);
+    dCtx.beginPath();
+    dCtx.moveTo(e.offsetX, e.offsetY);
+    dCtx.lineTo(e.offsetX + .1, e.offsetY + .1);
+    dCtx.strokeStyle = penColor; dCtx.lineWidth = penSize;
+    dCtx.lineCap = "round"; dCtx.lineJoin = "round";
+    dCtx.stroke();
+  });
+  dCanvas.addEventListener("pointermove", (e) => {
+    if (!drawing) return;
+    dCtx.lineTo(e.offsetX, e.offsetY);
+    dCtx.stroke();
+  });
+  dCanvas.addEventListener("pointerup", () => { drawing = false; });
+  document.getElementById("doodleClear").addEventListener("click", clearDoodle);
+  document.getElementById("doodleCancel").addEventListener("click", () => { overlay.hidden = true; });
+  document.getElementById("doodleSave").addEventListener("click", () => {
+    state.photos.push({ src: dCanvas.toDataURL("image/png"), caption: "", ...scatter(state.photos.length) });
+    try { save(); } catch (e) {
+      state.photos.pop();
+      alert("The journal's storage is full — remove a photo first.");
+    }
+    overlay.hidden = true;
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
